@@ -4,11 +4,11 @@ const router = express.Router();
 
 const marketService = require('../service/marketService')
 
-// 도매시장 코드 조회
+// 품목 코드 조회
 router.get('/', asyncMiddleware(async(req, res) => {
-    const result = await marketService.getMarketCode();
+    const { pageNo } = req.params;
+    const result = await marketService.getProductCode(pageNo);
     res.json(result);
 }));
-
 
 module.exports = router;
