@@ -1,41 +1,47 @@
 const createError = require('http-errors');
 const express = require('express');
-const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
 const connect = require('./database/server');
+const dotenv = require('dotenv');
+dotenv.config();
 
-const indexRouter = require('./routes/index');
-const usersRouter = require('./routes/users');
-require('dotenv').config();
+const markets = require('./routes/markets');
 
-var app = express();
+const app = express();
 
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
+// 라우터 설정
+app.use('/markets', markets);
 
-connect()
+// 데이터베이스 연결
+connect();
 
-// catch 404 and forward to error handler
+// 404 처리 미들웨어
 app.use(function(req, res, next) {
   next(createError(404));
 });
 
-// error handler
+// 전역 에러 처리 미들웨어
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
+  const statusCode = err.status || 500;
+
+  // 개발 환경에서만 에러 스택 표시
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  // 에러 로깅
+  console.error(err.stack);
+
+  // 클라이언트에 에러 응답 전송
+  res.status(statusCode).json({
+    status: 'error',
+    message: err.message || 'Internal Server Error',
+  });
 });
 
 module.exports = app;
