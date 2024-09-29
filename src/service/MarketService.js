@@ -18,6 +18,7 @@ const getMarketCode = async () => {
 
     let result = await Market.find().then(sort);
 
+    // 데이터가 없는 경우
     if(result.length === 0) {
         const apiResult = await openApi.getMarketCode();
 
@@ -39,12 +40,24 @@ const getMarketCode = async () => {
 
 // 품목 코드 조회
 const getProductCode = async (pageNo) => {
-    // const result = await openApi.getProductCode(pageNo);
 
     let result = await Products.find();
     
+    // 데이터가 없는 경우
+    if(result.length === 0) {
+        const apiResult = await openApi.getProductCode(pageNo);
+        
+    }
+
 
     return result;
+}
+
+const convertToDocument = (datas) => {
+    let result = {};
+
+    
+
 }
 
 
