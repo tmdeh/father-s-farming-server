@@ -19,7 +19,7 @@ const getProductCode = async(pageNo) => {
             pageNo
         }
     })
-
+    console.log(response.data);
     return response.data;
 }
 

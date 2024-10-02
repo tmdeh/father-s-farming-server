@@ -39,26 +39,66 @@ const getMarketCode = async () => {
 }
 
 // 품목 코드 조회
-const getProductCode = async (pageNo) => {
+const getProductCode = async (pageNo, size) => {
+    // 데이터를 몽고DB 스키마에 맞게 변환하는 함수
+    const toDocument = (data) => {
+        const result = {
+            large: []
+        };
 
-    let result = await Products.find();
-    
-    // 데이터가 없는 경우
-    if(result.length === 0) {
-        const apiResult = await openApi.getProductCode(pageNo);
-        
+        const largeMap = new Map();
+        const midMap = new Map();
+
+        data.forEach(e => {
+            // 대분류 처리
+            if (!largeMap.has(e.large)) {
+                largeMap.set(e.large, {
+                    name: e.largeName,
+                    code: e.large,
+                    mid: []
+                });
+                result.large.push(largeMap.get(e.large));
+            }
+
+            // 중분류 처리
+            const largeEntry = largeMap.get(e.large);
+            if (!midMap.has(e.mid)) {
+                const midObj = {
+                    name: e.midName,
+                    code: e.mid,
+                    small: []
+                };
+                largeEntry.mid.push(midObj);
+                midMap.set(e.mid, midObj);
+            }
+
+            // 소분류 처리
+            midMap.get(e.mid).small.push({
+                name: e.goodName,
+                code: e.small
+            });
+        });
+        return result;
     }
 
+    let result = await Products.find();
+
+    if (result.length === 0) {
+        let data = [];
+        for (let page = 1; page <= 3; page++) {
+            let element = await openApi.getProductCode(page).then((res) => res.data);  // API 호출
+            data.push(element);
+        }
+
+        console.log(data.flat());
+
+        const products = new Products({data});
+        await products.save();
+    }
 
     return result;
 }
 
-const convertToDocument = (datas) => {
-    let result = {};
-
-    
-
-}
 
 
 
