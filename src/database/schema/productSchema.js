@@ -19,7 +19,7 @@ const largeSchema = new Schema({
 });
 
 const productSchema = new Schema({
-    data: [largeSchema],
+    large: [largeSchema],
     createdAt: { type: Date, default: Date.now, expires: '7d' },
 });
 

@@ -1,4 +1,5 @@
 const openApi = require('../modules/open-api/request');
+const fs = require("fs");
 const { Market } = require('../database/schema/marketSchema');
 const { Products } = require('../database/schema/productSchema');
 
@@ -40,16 +41,14 @@ const getMarketCode = async () => {
 
 // 품목 코드 조회
 const getProductCode = async (pageNo, size) => {
-    // 데이터를 몽고DB 스키마에 맞게 변환하는 함수
     const toDocument = (data) => {
         const result = {
             large: []
         };
-
+    
         const largeMap = new Map();
-        const midMap = new Map();
-
-        data.forEach(e => {
+    
+        for (let e of data) {
             // 대분류 처리
             if (!largeMap.has(e.large)) {
                 largeMap.set(e.large, {
@@ -58,42 +57,56 @@ const getProductCode = async (pageNo, size) => {
                     mid: []
                 });
                 result.large.push(largeMap.get(e.large));
+                continue;
             }
-
-            // 중분류 처리
+    
             const largeEntry = largeMap.get(e.large);
-            if (!midMap.has(e.mid)) {
+    
+            // 대분류 별로 독립적인 midMap 생성
+            if (!largeEntry.midMap) {
+                largeEntry.midMap = new Map();
+            }
+    
+            // 중분류 처리
+            if (!largeEntry.midMap.has(e.mid)) {
                 const midObj = {
                     name: e.midName,
                     code: e.mid,
                     small: []
                 };
                 largeEntry.mid.push(midObj);
-                midMap.set(e.mid, midObj);
+                largeEntry.midMap.set(e.mid, midObj);
+                continue;
+            }
+    
+            if(e.goodName === '사용불가') {
+                continue;
             }
 
             // 소분류 처리
-            midMap.get(e.mid).small.push({
+            largeEntry.midMap.get(e.mid).small.push({
                 name: e.goodName,
                 code: e.small
             });
-        });
+        }
+    
+        // midMap 제거 (필요하지 않음)
+        result.large.forEach(large => delete large.midMap);
+    
         return result;
-    }
+    };
+    
 
     let result = await Products.find();
 
     if (result.length === 0) {
-        let data = [];
-        for (let page = 1; page <= 3; page++) {
+        let dataArr = [];
+        for (let page = 1; page <= 18; page++) {
             let element = await openApi.getProductCode(page).then((res) => res.data);  // API 호출
-            data.push(element);
+            dataArr.push(element);
         }
-
-        console.log(data.flat());
-
-        const products = new Products({data});
-        await products.save();
+        await Products.create({large: toDocument(dataArr.flat()).large});
+        result = await Products.find();
     }
 
     return result;
