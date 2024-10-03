@@ -1,5 +1,4 @@
 const openApi = require('../modules/open-api/request');
-const fs = require("fs");
 const { Market } = require('../database/schema/marketSchema');
 const { Products } = require('../database/schema/productSchema');
 
@@ -89,10 +88,7 @@ const getProductCode = async (pageNo, size) => {
                 code: e.small
             });
         }
-    
-        // midMap 제거 (필요하지 않음)
-        result.large.forEach(large => delete large.midMap);
-    
+        
         return result;
     };
     
