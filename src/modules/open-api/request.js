@@ -19,7 +19,7 @@ const getProductCode = async(pageNo) => {
             pageNo
         }
     })
-    console.log(response.data);
+    
     return response.data;
 }
 
@@ -35,7 +35,10 @@ const getWholesaleMarketRealTime = async(pageNo, whsalCd, large, mid, small) => 
     })
 
     return response.data;
-} 
+}
+
+
+
 
 
 module.exports = {

@@ -1,4 +1,5 @@
 const openApi = require('../modules/open-api/request');
+const productUpdate = require('../modules/cron/productUpdate')
 const { Market } = require('../database/schema/marketSchema');
 const { Products } = require('../database/schema/productSchema');
 
@@ -21,7 +22,7 @@ const getMarketCode = async () => {
     // 데이터가 없는 경우
     if(result.length === 0) {
         const apiResult = await openApi.getMarketCode();
-
+        // TODO: 코드 분리 필요
         const savePromises = apiResult.data.map(async (data) => {
             const market = new Market({
                 name: data.codeName,
@@ -39,72 +40,9 @@ const getMarketCode = async () => {
 }
 
 // 품목 코드 조회
-const getProductCode = async (pageNo, size) => {
-    const toDocument = (data) => {
-        const result = {
-            large: []
-        };
-    
-        const largeMap = new Map();
-    
-        for (let e of data) {
-            // 대분류 처리
-            if (!largeMap.has(e.large)) {
-                largeMap.set(e.large, {
-                    name: e.largeName,
-                    code: e.large,
-                    mid: []
-                });
-                result.large.push(largeMap.get(e.large));
-                continue;
-            }
-    
-            const largeEntry = largeMap.get(e.large);
-    
-            // 대분류 별로 독립적인 midMap 생성
-            if (!largeEntry.midMap) {
-                largeEntry.midMap = new Map();
-            }
-    
-            // 중분류 처리
-            if (!largeEntry.midMap.has(e.mid)) {
-                const midObj = {
-                    name: e.midName,
-                    code: e.mid,
-                    small: []
-                };
-                largeEntry.mid.push(midObj);
-                largeEntry.midMap.set(e.mid, midObj);
-                continue;
-            }
-    
-            if(e.goodName === '사용불가') {
-                continue;
-            }
-
-            // 소분류 처리
-            largeEntry.midMap.get(e.mid).small.push({
-                name: e.goodName,
-                code: e.small
-            });
-        }
-        
-        return result;
-    };
-    
-
-    let result = await Products.find();
-
-    if (result.length === 0) {
-        let dataArr = [];
-        for (let page = 1; page <= 18; page++) {
-            let element = await openApi.getProductCode(page).then((res) => res.data);  // API 호출
-            dataArr.push(element);
-        }
-        await Products.create({large: toDocument(dataArr.flat()).large});
-        result = await Products.find();
-    }
-
+const getProductCode = async ({ large = '00', mid = '00', small = '00' }) => {
+    let result = await Products.find();    
+    console.log({large, mid, small})
     return result;
 }
 

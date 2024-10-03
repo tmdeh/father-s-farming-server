@@ -7,7 +7,9 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const markets = require('./routes/markets');
-const products = require('./routes/product')
+const products = require('./routes/product');
+
+const productUpdate = require('./modules/cron/productUpdate');
 
 const app = express();
 
@@ -22,6 +24,9 @@ app.use('/products', products);
 
 // 데이터베이스 연결
 connect();
+
+// 스케줄러
+productUpdate.scheduleUpdate();
 
 // 404 처리 미들웨어
 app.use(function(req, res, next) {
