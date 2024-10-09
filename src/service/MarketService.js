@@ -1,5 +1,5 @@
 const openApi = require('../modules/open-api/request');
-const productUpdate = require('../modules/cron/productUpdate')
+const productDocument = require('../modules/cron/productUpdate')
 const { Market } = require('../database/schema/marketSchema');
 const { Products } = require('../database/schema/productSchema');
 
@@ -40,9 +40,14 @@ const getMarketCode = async () => {
 }
 
 // 품목 코드 조회
-const getProductCode = async ({ large = '00', mid = '00', small = '00' }) => {
-    let result = await Products.find();    
-    console.log({large, mid, small})
+const getProductCode = async ({ large = '00', mid = '00', small = '00', pageSize}) => {
+    let result = await Products.find();
+
+    if(result.length === 0) {
+        await productDocument.update();
+        result = await Products.find(query).limit(pageSize);
+    }
+
     return result;
 }
 

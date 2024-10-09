@@ -1,4 +1,5 @@
 const cron = require('node-cron');
+const openApi = require('../open-api/request');
 const { Products } = require('../../database/schema/productSchema');
 
 const toDocument = (data) => {
@@ -21,8 +22,7 @@ const toDocument = (data) => {
         }
 
         const largeEntry = largeMap.get(e.large);
-
-        // 대분류 별로 독립적인 midMap 생성
+        
         if (!largeEntry.midMap) {
             largeEntry.midMap = new Map();
         }

@@ -20,7 +20,7 @@ const largeSchema = new Schema({
 
 const productSchema = new Schema({
     large: [largeSchema],
-    createdAt: { type: Date, default: Date.now, expires: '7d' },
+    createdAt: { type: Date, default: Date.now },
 });
 
 const Products = mongoose.model('Products', productSchema);

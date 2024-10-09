@@ -35,6 +35,9 @@ app.use(function(req, res, next) {
 
 // 전역 에러 처리 미들웨어
 app.use(function(err, req, res, next) {
+  
+  console.log(err)
+
   const statusCode = err.status || 500;
 
   // 개발 환경에서만 에러 스택 표시
