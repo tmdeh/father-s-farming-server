@@ -12,14 +12,10 @@ const midSchema = new Schema({
     small: [smallSchema], 
 });
 
-const largeSchema = new Schema({
-    name: { type: String },
-    code: { type: String },
-    mid: [midSchema],  
-});
-
 const productSchema = new Schema({
-    large: [largeSchema],
+    name: {type: String},
+    code: {type: String},
+    mid: [midSchema],
     createdAt: { type: Date, default: Date.now },
 });
 

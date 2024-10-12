@@ -1,11 +1,10 @@
 const cron = require('node-cron');
 const openApi = require('../open-api/request');
+const fs = require('fs');
 const { Products } = require('../../database/schema/productSchema');
 
 const toDocument = (data) => {
-    const result = {
-        large: []
-    };
+    const large = [];
 
     const largeMap = new Map();
 
@@ -17,7 +16,7 @@ const toDocument = (data) => {
                 code: e.large,
                 mid: []
             });
-            result.large.push(largeMap.get(e.large));
+            large.push(largeMap.get(e.large));
             continue;
         }
 
@@ -49,8 +48,7 @@ const toDocument = (data) => {
             code: e.small
         });
     }
-    
-    return result;
+    return large;
 };
 
 const update = async() => {
@@ -60,7 +58,17 @@ const update = async() => {
         let element = await openApi.getProductCode(page).then((res) => res.data);  // API 호출
         dataArr.push(element);
     }
-    await Products.create({large: toDocument(dataArr.flat()).large});
+
+
+    await Products.create(toDocument(dataArr.flat()).flat());
+}
+
+
+const mockUpdate = async() => {
+    await Products.deleteMany();
+    const data = JSON.parse(fs.readFileSync('mock.json', 'utf-8'))[0];
+    const document = toDocument(data)
+    return await Products.create(document);
 }
 
 const scheduleUpdate = () => {
@@ -73,5 +81,6 @@ const scheduleUpdate = () => {
 
 module.exports = {
     scheduleUpdate,
+    mockUpdate,
     update
 };
