@@ -9,7 +9,7 @@ dotenv.config();
 const markets = require('./routes/markets');
 const products = require('./routes/product');
 
-const productUpdate = require('./modules/cron/productUpdate');
+const product = require('./modules/cron/product');
 
 const app = express();
 
@@ -26,7 +26,7 @@ app.use('/products', products);
 connect();
 
 // 스케줄러
-productUpdate.scheduleUpdate();
+product.scheduleUpdate();
 
 // 404 처리 미들웨어
 app.use(function(req, res, next) {

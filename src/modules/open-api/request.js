@@ -37,6 +37,11 @@ const getWholesaleMarketRealTime = async(pageNo, whsalCd, large, mid, small) => 
     return response.data;
 }
 
+const getCorporateCode = async() => {
+    const response = await axios('/code/cmp.do');
+    return response.data;
+}
+
 
 
 
@@ -44,5 +49,6 @@ const getWholesaleMarketRealTime = async(pageNo, whsalCd, large, mid, small) => 
 module.exports = {
     getMarketCode,
     getProductCode,
+    getCorporateCode,
     getWholesaleMarketRealTime
 };

@@ -1,7 +1,8 @@
 const openApi = require('../modules/open-api/request');
-const productDocument = require('../modules/cron/productUpdate')
 const { Market } = require('../database/schema/marketSchema');
 const { Products } = require('../database/schema/productSchema');
+const { Coporate } = require('../database/schema/coporateSchema');
+const coporateCron = require('../modules/cron/coporate');
 
 // 시장 코드 조회
 const getMarketCode = async () => {
@@ -90,8 +91,21 @@ const getProductCode = async ({ large = '00', mid = '00', small = '00' }) => {
 };
 
 
+const getCorporateCode = async() => {
+    let corporates = await Coporate.find();
+
+    if(corporates.length === 0) {
+        await coporateCron.update();
+        corporates = await Products.find();
+    }
+
+    return corporates;
+}
+
+
 
 module.exports = {
     getMarketCode,
+    getCorporateCode,
     getProductCode,
 }

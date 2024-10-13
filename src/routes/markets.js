@@ -10,4 +10,9 @@ router.get('/', asyncMiddleware(async(req, res) => {
     res.json(result);
 }));
 
+router.get('/corporate', asyncMiddleware(async(req, res) => {
+    const result = await marketService.getCorporateCode();
+    res.json(result);
+}))
+
 module.exports = router;
